@@ -5,10 +5,13 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String role =
+        ModalRoute.of(context)?.settings.arguments as String? ?? "User";
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: const Text("Dashboard"),
+        title: Text("$role Dashboard"),
         elevation: 0,
         actions: [
           IconButton(
@@ -19,109 +22,114 @@ class DashboardScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ================= HEADER =================
-            const Text(
-              "Welcome 👋",
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 6),
-            const Text(
-              "Here’s the current ticket & SLA overview",
-              style: TextStyle(color: Colors.black54),
-            ),
-            const SizedBox(height: 24),
+        child: _buildDashboardByRole(context, role), // ✅ pass context
+      ),
+    );
+  }
 
-            // ================= SLA STATUS =================
-            const Text(
-              "SLA Status",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
+  // ================= ROLE SWITCH =================
 
-            GridView.count(
-              crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              children: const [
-                _StatusCard(
-                  title: "Within SLA",
-                  value: "12",
-                  color: Colors.green,
-                  icon: Icons.check_circle,
-                ),
-                _StatusCard(
-                  title: "At Risk",
-                  value: "5",
-                  color: Colors.orange,
-                  icon: Icons.warning,
-                ),
-                _StatusCard(
-                  title: "Breached",
-                  value: "2",
-                  color: Colors.red,
-                  icon: Icons.error,
-                ),
-              ],
-            ),
+  Widget _buildDashboardByRole(BuildContext context, String role) {
+    switch (role) {
+      case "Agent":
+        return _agentDashboard();
+      case "Admin":
+        return _adminDashboard(context);
+      default:
+        return _userDashboard(context);
+    }
+  }
 
-            const SizedBox(height: 32),
+  // ================= USER DASHBOARD =================
 
-            // ================= TICKETS =================
-            const Text(
-              "Recent Tickets",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
+  Widget _userDashboard(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _header("Your Tickets"),
+        _ticketTile(
+          "Login issue",
+          "SLA expires in 3h",
+          Colors.orange,
+        ),
+        _ticketTile(
+          "Payment failed",
+          "Within SLA",
+          Colors.green,
+        ),
+        const SizedBox(height: 24), // ✅ safe spacing
+        _actionButton(
+          context,
+          "Create New Ticket",
+          Icons.add,
+        ),
+      ],
+    );
+  }
 
-            _ticketTile(
-              title: "High Priority Issue",
-              subtitle: "SLA expires in 1h 30m",
-              color: Colors.red,
-            ),
-            _ticketTile(
-              title: "Medium Priority Request",
-              subtitle: "Assigned to Agent",
-              color: Colors.orange,
-            ),
-            _ticketTile(
-              title: "Low Priority Ticket",
-              subtitle: "Waiting for response",
-              color: Colors.green,
-            ),
-          ],
+  // ================= AGENT DASHBOARD =================
+
+  Widget _agentDashboard() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _header("Assigned Tickets"),
+        _ticketTile(
+          "Server down",
+          "SLA expires in 45m",
+          Colors.red,
+        ),
+        _ticketTile(
+          "UI bug",
+          "At risk",
+          Colors.orange,
+        ),
+        const SizedBox(height: 20),
+        _statusChip("⚠ SLA At Risk"),
+      ],
+    );
+  }
+
+  // ================= ADMIN DASHBOARD =================
+
+  Widget _adminDashboard(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _header("SLA Overview"),
+        _slaCard("High Priority SLA", "2 Hours"),
+        _slaCard("Medium Priority SLA", "8 Hours"),
+        _slaCard("Low Priority SLA", "24 Hours"),
+        const SizedBox(height: 24),
+        _actionButton(
+          context,
+          "Manage Escalation Rules",
+          Icons.settings,
+        ),
+      ],
+    );
+  }
+
+  // ================= REUSABLE UI =================
+
+  Widget _header(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
   }
 
-  // ================= TICKET TILE =================
-  static Widget _ticketTile({
-    required String title,
-    required String subtitle,
-    required Color color,
-  }) {
+  Widget _ticketTile(String title, String subtitle, Color color) {
     return Card(
-      elevation: 2,
-      margin: const EdgeInsets.only(bottom: 10),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: color.withOpacity(0.15),
@@ -129,62 +137,49 @@ class DashboardScreen extends StatelessWidget {
         ),
         title: Text(title),
         subtitle: Text(subtitle),
-        trailing: const Icon(Icons.chevron_right),
       ),
     );
   }
-}
 
-// ================= SLA STATUS CARD =================
-
-class _StatusCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final Color color;
-  final IconData icon;
-
-  const _StatusCard({
-    required this.title,
-    required this.value,
-    required this.color,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-          ),
-        ],
-        border: Border(
-          left: BorderSide(color: color, width: 4),
-        ),
+  Widget _actionButton(
+    BuildContext context,
+    String text,
+    IconData icon,
+  ) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () {
+          Navigator.pushNamed(context, '/create-ticket');
+        },
+        icon: Icon(icon),
+        label: Text(text),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
+    );
+  }
+
+  Widget _statusChip(String text) {
+    return Chip(
+      backgroundColor: Colors.orange.withOpacity(0.15),
+      label: Text(
+        text,
+        style: const TextStyle(color: Colors.orange),
+      ),
+    );
+  }
+
+  Widget _slaCard(String title, String time) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        leading: const Icon(Icons.timer),
+        title: Text(title),
+        trailing: Text(
+          time,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
           ),
-          Text(
-            title,
-            style: const TextStyle(color: Colors.black54),
-          ),
-        ],
+        ),
       ),
     );
   }

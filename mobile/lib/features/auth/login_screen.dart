@@ -20,7 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void login() {
-    Navigator.pushReplacementNamed(context, '/dashboard');
+    Navigator.pushReplacementNamed(context, '/role');
   }
 
  @override
@@ -58,6 +58,9 @@ Widget build(BuildContext context) {
                   ),
                 ),
                 const SizedBox(height: 24),
+                  
+
+                 
 
                 // 🔹 TITLE
                 const Text(
@@ -81,7 +84,7 @@ Widget build(BuildContext context) {
                 TextField(
                   controller: emailController,
                   decoration: InputDecoration(
-                    labelText: "Corporate Email",
+                    labelText: "Email",
                     prefixIcon: const Icon(Icons.email_outlined),
                     filled: true,
                     fillColor: const Color(0xFFF1F3F6),
@@ -125,6 +128,15 @@ Widget build(BuildContext context) {
                   text: "LOGIN",
                   onPressed: login,
                 ),
+
+                 Center(
+  child: TextButton(
+    onPressed: () {
+      Navigator.pushNamed(context, '/register');
+    },
+    child: const Text("Don’t have an account? Register"),
+  ),
+),
               ],
             ),
           ),
