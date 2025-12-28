@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../shared/widgets/primary_button.dart';
+import '../ticket_store.dart';
 
 class CreateTicketScreen extends StatefulWidget {
   const CreateTicketScreen({super.key});
@@ -32,10 +33,18 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
     }
   }
 
-  void submitTicket() {
-    // Backend API will come here later
-    Navigator.pop(context);
-  }
+void submitTicket() {
+  final ticket = Ticket(
+    title: titleController.text,
+    description: descriptionController.text,
+    priority: priority,
+    createdBy: "User",
+  );
+
+  TicketStore.addTicket(ticket);
+
+  Navigator.pop(context);
+}
 
   @override
   Widget build(BuildContext context) {

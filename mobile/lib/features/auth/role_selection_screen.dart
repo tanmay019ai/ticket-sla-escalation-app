@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/session/session_manager.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
   const RoleSelectionScreen({super.key});
@@ -10,6 +11,7 @@ class RoleSelectionScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Select Role"),
         elevation: 0,
+        automaticallyImplyLeading: false, // 🔒 prevent back to login
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -46,6 +48,8 @@ class RoleSelectionScreen extends StatelessWidget {
     );
   }
 
+  // ================= ROLE CARD =================
+
   Widget _roleCard(
     BuildContext context, {
     required String title,
@@ -73,11 +77,20 @@ class RoleSelectionScreen extends StatelessWidget {
         ),
         subtitle: Text(description),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+
+        // 🔥 MAIN FIX IS HERE
         onTap: () {
-          Navigator.pushReplacementNamed(
+          // create session
+          SessionManager.login(
+            userRole: title,
+            userEmail: "$title@example.com", // fake for now
+          );
+
+          // clear stack & go to dashboard
+          Navigator.pushNamedAndRemoveUntil(
             context,
             '/dashboard',
-            arguments: title, // pass role
+            (route) => false,
           );
         },
       ),
