@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../shared/widgets/primary_button.dart';
+import '../../core/api/auth_api.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,9 +20,30 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void login() {
-    Navigator.pushReplacementNamed(context, '/role');
+  void login() async {
+  final email = emailController.text.trim();
+  final password = passwordController.text.trim();
+
+  if (email.isEmpty || password.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Email & password required")),
+    );
+    return;
   }
+
+  final error = await AuthApi.login(email, password);
+
+  if (error != null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(error)),
+    );
+    return;
+  }
+
+  // ✅ LOGIN SUCCESS → DASHBOARD
+  Navigator.pushReplacementNamed(context, '/dashboard');
+}
+
 
  @override
 Widget build(BuildContext context) {
