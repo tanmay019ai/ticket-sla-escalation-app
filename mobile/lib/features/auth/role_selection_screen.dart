@@ -11,7 +11,7 @@ class RoleSelectionScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Select Role"),
         elevation: 0,
-        automaticallyImplyLeading: false, // 🔒 prevent back to login
+        automaticallyImplyLeading: false, // 🔒 block back
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -78,15 +78,14 @@ class RoleSelectionScreen extends StatelessWidget {
         subtitle: Text(description),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
 
-        // 🔥 MAIN FIX IS HERE
-        onTap: () {
-          // create session
-          SessionManager.login(
-            userRole: title,
-            userEmail: "$title@example.com", // fake for now
+        onTap: () async {
+          // ✅ SAVE SESSION (MATCHES SESSION MANAGER)
+          await SessionManager.login(
+            title,                 // role
+            "local-dev-token",     // token (fake for now)
           );
 
-          // clear stack & go to dashboard
+          // ✅ CLEAR STACK & GO DASHBOARD
           Navigator.pushNamedAndRemoveUntil(
             context,
             '/dashboard',

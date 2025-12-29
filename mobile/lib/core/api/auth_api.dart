@@ -3,53 +3,74 @@ import 'package:http/http.dart' as http;
 import '../session/session_manager.dart';
 
 class AuthApi {
-  static const String baseUrl = 'http://10.0.2.2:5000'; // Android emulator
+  static const String baseUrl = "http://10.0.2.2:5000";
+  // Android emulator → localhost replacement
 
-  static Future<String?> login(String email, String password) async {
-    final res = await http.post(
-      Uri.parse('$baseUrl/auth/login'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': email,
-        'password': password,
-      }),
-    );
-
-    final data = jsonDecode(res.body);
-
-    if (res.statusCode == 200) {
-      await SessionManager.saveSession(
-        data['token'],
-        data['role'],
+  // ================= REGISTER =================
+  static Future<String?> register(
+    String email,
+    String password,
+    String role,
+  ) async {
+    try {
+      final res = await http.post(
+        Uri.parse("$baseUrl/auth/register"),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "email": email,
+          "password": password,
+          "role": role,
+        }),
       );
-      return null;
-    } else {
-      return data['message'];
+
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        final data = jsonDecode(res.body);
+
+        await SessionManager.login(
+          data['role'] ?? role,
+          data['token'] ?? '',
+        );
+
+        return null;
+      }
+
+      final data = jsonDecode(res.body);
+      return data['message'] ?? "Register failed";
+    } catch (e) {
+      return "Server not reachable";
     }
   }
 
-  static Future<String?> register(
-      String email, String password, String role) async {
-    final res = await http.post(
-      Uri.parse('$baseUrl/auth/register'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': email,
-        'password': password,
-        'role': role,
-      }),
-    );
-
-    final data = jsonDecode(res.body);
-
-    if (res.statusCode == 201) {
-      await SessionManager.saveSession(
-        data['token'],
-        data['role'],
+  // ================= LOGIN =================
+  static Future<String?> login(
+    String email,
+    String password,
+  ) async {
+    try {
+      final res = await http.post(
+        Uri.parse("$baseUrl/auth/login"),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "email": email,
+          "password": password,
+        }),
       );
-      return null;
-    } else {
-      return data['message'];
+
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+
+        await SessionManager.login(
+          data['role'],
+          data['token'],
+        );
+
+        return null; // ✅ SUCCESS
+      }
+
+      final data = jsonDecode(res.body);
+      return data['message'] ?? "Invalid credentials";
+    } catch (e) {
+      return "Server not reachable";
     }
   }
 }
