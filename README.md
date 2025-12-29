@@ -31,17 +31,7 @@ The Ticket SLA Escalation App is designed to streamline ticket management and en
 -   🛡️ **Role-Based Access Control**: (Inferred) Distinguish between different user roles (e.g., agents, administrators).
 
 ## 🖥️ Screenshots
-
-<!-- TODO: Add actual screenshots of the mobile application and potentially the API interactions if relevant. -->
-<!-- Example:
-
-![Login Screen](images/login-screen.png)
-
-![Ticket List](images/ticket-list.png)
-
-![Ticket Detail](images/ticket-detail.png)
--->
-Currently, no screenshots are available.
+![Backend Flow](images/backend_flow.png)
 
 ## 🛠️ Tech Stack
 
